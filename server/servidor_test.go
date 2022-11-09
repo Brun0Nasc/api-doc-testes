@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -8,7 +9,7 @@ import (
 
 func TestObterJogadores(t *testing.T) {
 	t.Run("retornar resultado de Maria", func(t *testing.T) {
-		requisicao, _ := http.NewRequest(http.MethodGet, "/jogadores/Maria", nil)
+		requisicao := novaRequisicaoObterPontuacao("Maria")
 		resposta := httptest.NewRecorder()
 
 		ServidorJogador(resposta, requisicao)
@@ -22,7 +23,7 @@ func TestObterJogadores(t *testing.T) {
 	})
 
 	t.Run("retornar resultado de Pedro Migule", func(t *testing.T) {
-		requisicao, _ := http.NewRequest(http.MethodGet, "/jogadores/Pedro", nil)
+		requisicao := novaRequisicaoObterPontuacao("Pedro")
 		resposta := httptest.NewRecorder()
 
 		ServidorJogador(resposta, requisicao)
@@ -30,8 +31,18 @@ func TestObterJogadores(t *testing.T) {
 		recebido := resposta.Body.String()
 		esperado := "10"
 
-		if recebido != esperado {
-			t.Errorf("recebido '%s', esperado '%s'", recebido, esperado)
-		}
+		verificaCorpoRequisicao(t, recebido, esperado)
 	})
+}
+
+func novaRequisicaoObterPontuacao(nome string) *http.Request {
+	requisicao, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/jogadores/%s", nome), nil)
+	return requisicao
+}
+
+func verificaCorpoRequisicao(t *testing.T, recebido, esperado string) {
+	t.Helper()
+	if recebido != esperado {
+		t.Errorf("recebido '%s', esperado '%s'", recebido, esperado)
+	}
 }
