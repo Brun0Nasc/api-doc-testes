@@ -20,4 +20,18 @@ func TestObterJogadores(t *testing.T) {
 			t.Errorf("recebido '%s', esperado '%s'", recebido, esperado)
 		}
 	})
+
+	t.Run("retornar resultado de Pedro Migule", func(t *testing.T) {
+		requisicao, _ := http.NewRequest(http.MethodGet, "/jogadores/Pedro", nil)
+		resposta := httptest.NewRecorder()
+
+		ServidorJogador(resposta, requisicao)
+
+		recebido := resposta.Body.String()
+		esperado := "10"
+
+		if recebido != esperado {
+			t.Errorf("recebido '%s', esperado '%s'", recebido, esperado)
+		}
+	})
 }
