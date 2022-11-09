@@ -7,31 +7,41 @@ import (
 	"testing"
 )
 
+type EsbocoArmazenamentoJogador struct {
+	pontuacoes map[string]int
+}
+
+func (e *EsbocoArmazenamentoJogador) ObterPontuacaoJogador(nome string) int {
+	pontuacao := e.pontuacoes[nome]
+	return pontuacao
+}
+
 func TestObterJogadores(t *testing.T) {
+	armazenamento := EsbocoArmazenamentoJogador{
+		map[string]int{
+			"Maria":20,
+			"Pedro":10,
+		},
+	}
+
+	servidor := &ServidorJogador{&armazenamento}
+
 	t.Run("retornar resultado de Maria", func(t *testing.T) {
 		requisicao := novaRequisicaoObterPontuacao("Maria")
 		resposta := httptest.NewRecorder()
 
-		ServidorJogador(resposta, requisicao)
+		servidor.ServeHTTP(resposta, requisicao)
 
-		recebido := resposta.Body.String()
-		esperado := "20"
-
-		if recebido != esperado {
-			t.Errorf("recebido '%s', esperado '%s'", recebido, esperado)
-		}
+		verificaCorpoRequisicao(t, resposta.Body.String(), "20")
 	})
 
 	t.Run("retornar resultado de Pedro Migule", func(t *testing.T) {
 		requisicao := novaRequisicaoObterPontuacao("Pedro")
 		resposta := httptest.NewRecorder()
 
-		ServidorJogador(resposta, requisicao)
+		servidor.ServeHTTP(resposta, requisicao)
 
-		recebido := resposta.Body.String()
-		esperado := "10"
-
-		verificaCorpoRequisicao(t, recebido, esperado)
+		verificaCorpoRequisicao(t, resposta.Body.String(), "10")
 	})
 }
 

@@ -8,8 +8,9 @@ import (
 )
 
 func main(){
-	tratador := http.HandlerFunc(server.ServidorJogador)
-	if err := http.ListenAndServe(":3030", tratador); err != nil {
+	servidor := &server.ServidorJogador{}
+
+	if err := http.ListenAndServe(":3030", servidor); err != nil {
 		log.Fatalf("não foi possível escutar na porta 3030 %v", err)
 	}
 }
