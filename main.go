@@ -7,13 +7,9 @@ import (
 )
 
 func main(){
-	tratador := http.HandlerFunc(server.ServidorJogador) 
-	/*
-	*A função http.HandlerFunc() é usada para converter
-	*a função server.ServidorJogador() em um tipo http.Handler 
-	*que pode ser usado para lidar com solicitações HTTP.
-	*/
-	if err := http.ListenAndServe(":5000", tratador); err != nil {
+	servidor := &server.ServidorJogador{}
+
+	if err := http.ListenAndServe(":5000", servidor); err != nil {
 		log.Fatalf("não foi possível escutar na porta 5000 %v", err)
 	}
 }
