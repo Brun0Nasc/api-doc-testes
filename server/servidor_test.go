@@ -7,38 +7,13 @@ import (
 	"testing"
 )
 
-/*
-*Este código é um teste unitário para o pacote server. 
-*Ele testa a função ServeHTTP do ServidorJogador para garantir
-*que ela está respondendo corretamente às requisições HTTP.
-*/
-
 type EsbocoArmazenamentoJogador struct {
 	potuacoes map[string]int
 }
 
-/*
-*O teste usa uma implementação de esboço do ArmazenamentoJogador 
-*chamada EsbocoArmazenamentoJogador, que contém um mapa que mapeia 
-*nomes de jogadores a suas pontuações. O esboço é usado como fonte 
-*de dados para a função ObterPontuacaoJogador do ServidorJogador.
-*/
-
 func (e *EsbocoArmazenamentoJogador) ObterPontuacaoJogador(nome string) int {
 	pontuacao := e.potuacoes[nome]
 	return pontuacao
-}
-
-func comparaResultados(t *testing.T, recebido, esperado string){
-	t.Helper()
-	if recebido != esperado {
-		t.Errorf("recebido '%s', esperado '%s'", recebido, esperado)
-	}
-}
-
-func novaRequisicaoObterPontuacao(nome string) *http.Request {
-	requisicao, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/jogadores/%s", nome), nil)
-	return requisicao
 }
 
 func TestObterJogadores(t *testing.T) {
@@ -54,22 +29,11 @@ func TestObterJogadores(t *testing.T) {
 		requisicao := novaRequisicaoObterPontuacao("Maria")
 		resposta := httptest.NewRecorder()
 
-		/*
-		*O teste usa a função novaRequisicaoObterPontuacao para criar uma nova requisição 
-		*HTTP com o método GET e o caminho correspondente ao jogador desejado. Em seguida, 
-		*a função ServeHTTP do ServidorJogador é chamada com essa requisição e um gravador 
-		*de resposta httptest.NewRecorder.
-		*/
-
 		servidor.ServeHTTP(resposta, requisicao)
 
+		verificarRespostaCodigoStatus(t, resposta.Code, http.StatusOK)
 		comparaResultados(t, resposta.Body.String(), "20")
 
-		/*
-		*O teste usa a função comparaResultados para comparar o resultado recebido com o 
-		*resultado esperado. Se o resultado recebido não for igual ao resultado esperado,
-		*o teste falhará e uma mensagem de erro será exibida.
-		*/
 	})
 
 	t.Run("retornando resultado de Pedro", func(t *testing.T) {
@@ -78,6 +42,41 @@ func TestObterJogadores(t *testing.T) {
 
 		servidor.ServeHTTP(resposta, requisicao)
 
+		verificarRespostaCodigoStatus(t, resposta.Code, http.StatusOK)
 		comparaResultados(t, resposta.Body.String(), "10")
 	})
+
+	t.Run("retorna 404 para o jogador não encontrado", func(t *testing.T) {
+		requisicao := novaRequisicaoObterPontuacao("Jorge")
+		resposta := httptest.NewRecorder()
+
+		servidor.ServeHTTP(resposta, requisicao)
+
+		recebido := resposta.Code
+		esperado := http.StatusNotFound
+
+		if recebido != esperado {
+			t.Errorf("recebido status %d esperado %d", recebido, esperado)
+		}
+	})
+}
+
+func comparaResultados(t *testing.T, recebido, esperado string){
+	t.Helper()
+	if recebido != esperado {
+		t.Errorf("recebido '%s', esperado '%s'", recebido, esperado)
+	}
+}
+
+func verificarRespostaCodigoStatus(t *testing.T, recebido, esperado int) {
+	t.Helper()
+
+	if recebido != esperado {
+		t.Errorf("não recebeu o código de status HTTP esperado, recebido %d, esperado %d", recebido, esperado)
+	}
+}
+
+func novaRequisicaoObterPontuacao(nome string) *http.Request {
+	requisicao, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/jogadores/%s", nome), nil)
+	return requisicao
 }
